@@ -1,4 +1,4 @@
-Just a [MinIO](https://min.io/) container running on a Pi and sitting behind an NGINX reverse proxy. But who's got time to configure that? I mean, _I_ did, but I wish someone else had published this already. So here you go.
+Just a [MinIO](https://min.io/) container running on a Pi and sitting behind an NGINX reverse proxy. Who's got time to configure that? I mean, _I_ did, but I wish someone else had published this already. So, here you go.
 
 "minifloppies" is simply the shortest word containing `m.*i.*n.*i.*o` and `p.*i` together in the same string. Plus, it conveniently seemed to fit this application's intended use case.
 
@@ -26,13 +26,7 @@ sudo mkdir -p /srv/minio_data /srv/minio_config
 
 Generate MinIO S3 keys.
 ```
-#!/bin/sh
-echo -n 'ACCESS KEY: '
-base64 /dev/urandom | tr -d '/+' | head -c 20 | tr '[:lower:]' '[:upper:]'
-echo
-echo -n 'SECRET KEY: '
-base64 /dev/urandom | tr -d '/+' | head -c 40
-echo
+./keygen.sh
 ```
 
 Run MinIO container with keys generated above.
@@ -61,48 +55,40 @@ mc share download --expire 96h [HOSTNAME]/resume/resume.pdf
 mc share list download
 ```
 
-## Configure NGINX on VPS
+## Configure NGINX (VPS)
+Ensure that [Docker Compose](https://docs.docker.com/compose/install/#install-compose) is installed.
+```
+sudo curl -L "https://github.com/docker/compose/releases/download/1.24.1/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
+```
+
+Configure NGINX and start. In the `sed` line, replace "`YOURACTUAL*`" with _your actual whatever_.
+```
+cd minifloppies/nginx
+sed -i 's/\[HOSTNAME\]/YOURACTUALHOSTNAME/g' nginx.conf    # e.g., my.domain.com
+sed -i 's/\[EMAIL\]/YOURACTUALEMAIL/g' docker-compose.yml  # e.g., myemail@gmail.com
+sudo docker-compose up
+```
 
 ## Configure SSH tunnel between Pi and VPS.
-On VPS, enable firewall.
-```
-firewall-cmd --permanent --add-port=80/tcp
-firewall-cmd --permanent --add-port=443/tcp
-firewall-cmd --permanent --new-zone=docker
-firewall-cmd --reload
-firewall-cmd --permanent --zone=docker --add-interface=docker0
-firewall-cmd --permanent --zone=docker --add-port=9000/tcp
-firewall-cmd --reload
-```
-
-Generate keys for `ssh_tunnel`, a restricted user on a VPS who may only open SSH tunnels.
-```
-ssh-keygen -t rsa -b 4096 -o -a 100 -N '' -f "$HOME/.ssh/[SSH_TUNNEL_KEY]"
-```
-
-On VPS, create the restricted `ssh_tunnel` user.
+On VPS, create a restricted user `ssh_tunnel` who may only open SSH tunnels.
 ```
 sudo useradd ssh_tunnel -m -d /home/ssh_tunnel -s /bin/bash
 sudo passwd ssh_tunnel
+```
+
+On Pi, generate and transfer SSH keys for restricted user `ssh_tunnel`.
+```
+ssh-keygen -t rsa -b 4096 -o -a 100 -N '' -f ~/.ssh/ssh_tunnel
+ssh-copy-id -i ~/.ssh/ssh_tunnel ssh_tunnel@[VPS]
+```
+
+On VPS, lock down restricted user `ssh_tunnel`.
+```
 sudo passwd -l ssh_tunnel
-sudo su ssh_tunnel
-```
-
-Manually copy over SSH public key and lock down `ssh_tunnel` user.
-```
-cd
-umask 0077
-mkdir -p .ssh
-vim .ssh/authorized_keys
-chmod 700 .ssh
-chmod 600 .ssh/authorized_keys
-chmod g-w,o-w .
-exit
 sudo usermod -s /usr/sbin/nologin ssh_tunnel
-```
 
-In VPS's `/etc/ssh/sshd_config`, lock down `ssh_tunnel`'s SSH settings.
-```
+# Modify /etc/ssh/sshd/config and restart SSHD.
 Match User ssh_tunnel
   AllowTcpForwarding yes
   X11Forwarding no
@@ -113,5 +99,5 @@ Match User ssh_tunnel
 
 On Pi, start persistent SSH tunnel to VPS via `cron` + `autossh`.
 ```
-*/5 * * * * pgrep -afi 'autossh.*ssh_tunnel@[VPS]' || autossh -M 0 -o 'ServerAliveInterval 30' -o 'ServerAliveCountMax 3' -p [PORT] -f -N -R [DOCKER_IP]:9000:127.0.0.1:9000 -i ~/.ssh/[SSH_TUNNEL_KEY] ssh_tunnel@[VPS]
+*/5 * * * * pgrep -afi 'autossh.*ssh_tunnel@[VPS]' || autossh -M 0 -o 'ServerAliveInterval 30' -o 'ServerAliveCountMax 3' -p [PORT] -f -N -R 172.17.0.1:9000:127.0.0.1:9000 -i ~/.ssh/ssh_tunnel ssh_tunnel@[VPS]
 ```
