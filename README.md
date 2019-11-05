@@ -20,15 +20,11 @@ docker --version  # Docker version 18.06.3-ce, build d7080c1
 sudo systemctl enable --now docker
 ```
 
-Install MinIO.
+Build MinIO image.
 ```
+cd minifloppies/minio
 curl -O https://raw.githubusercontent.com/pixelchrome/minio-arm/master/Dockerfile
 sudo docker build -t minio-arm .
-```
-
-Make directories for MinIO container.
-```
-sudo mkdir -p /srv/minio_data /srv/minio_config
 ```
 
 Generate MinIO S3 keys.
@@ -56,9 +52,9 @@ sudo chmod +x /usr/local/bin/mc
 Example MinIO client usage.
 ```
 mc config host add <HOSTNAME> <URL> <ACCESS_KEY> <SECRET_KEY>
-mc mb <HOSTNAME>/resume
-mc cp resume.pdf <HOSTNAME>/resume
-mc share download --expire 96h <HOSTNAME>/resume/resume.pdf
+mc mb <HOSTNAME>/share
+mc cp resume.pdf <HOSTNAME>/share
+mc share download --expire 96h <HOSTNAME>/share/resume.pdf
 mc share list download
 ```
 
