@@ -71,13 +71,14 @@ sudo chmod +x /usr/local/bin/docker-compose
 
 Configure NGINX and start.
 ```
-cd minifloppies/nginx
-export URL=<URL>
-sudo docker-run.sh
-cp site.conf /tmp/letsencrypt_config/nginx/site-confs/default
+cd minifloppies/letsencrypt
+echo 'URL=<URL>' > .env
+sudo docker-compose up
+cp site.conf /var/letsencrypt/nginx/site-confs/default
+docker container exec <CONTAINER_ID> nginx -g 'pid /run/nginx.pid;' -s reload
 ```
 
-## Configure SSH tunnel between Pi and VPS
+## Configure reverse SSH tunnel
 On VPS, create a restricted user `ssh_tunnel` who may only open SSH tunnels.
 ```
 sudo useradd ssh_tunnel -m -d /home/ssh_tunnel -s /bin/bash
