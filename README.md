@@ -2,6 +2,13 @@ Just a [MinIO](https://min.io/) container running on a Pi and sitting behind an 
 
 "minifloppies" is simply the shortest word containing `m.*i.*n.*i.*o` and `p.*i` together in the same string. Plus, it conveniently seemed to fit this application's intended use case.
 
+## Why use this?
+While interviewing for jobs, I had to share my resume with recruiters at many different companies, as one does. I like to keep a close hold on my resume and don't care for it to float around freely. For a while, I used `cpdf` to AES-encrypt my resume and provided a password to recruiters through an out-of-band message, like SMS. That provided a pretty terrible experience for anyone that needed to read or share that document, so I decided to implement a solution that met the following requirements:
+- Does not require me to host a sensitive document on third-party infrastructure. That rules out services like Firefox Send.
+- Encrypts files in transit.
+- Does not require entering a password.
+- Allows sharing via one-time download links.
+
 ## Configure MinIO on Raspberry Pi
 Install Docker ARM  using the [convenience script](https://docs.docker.com/install/linux/docker-ce/debian/#install-using-the-convenience-script).
 ```
