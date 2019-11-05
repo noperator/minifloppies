@@ -87,12 +87,14 @@ ssh-keygen -t rsa -b 4096 -o -a 100 -N '' -f ~/.ssh/ssh_tunnel
 ssh-copy-id -i ~/.ssh/ssh_tunnel ssh_tunnel@<VPS>
 ```
 
-On VPS, lock down restricted user `ssh_tunnel`.
+On VPS, lock down restricted user `ssh_tunnel`'s login settings...
 ```
 sudo passwd -l ssh_tunnel
 sudo usermod -s /usr/sbin/nologin ssh_tunnel
+```
 
-# Modify /etc/ssh/sshd/config and restart SSHD.
+...and SSH settings in `/etc/ssh/sshd/config`.
+```
 Match User ssh_tunnel
   AllowTcpForwarding yes
   X11Forwarding no
