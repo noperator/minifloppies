@@ -42,22 +42,6 @@ sudo docker run -d -p 9000:9000 \
   minio-arm server /data
 ```
 
-## Administer MinIO
-Download MinIO client.
-```
-sudo curl -o /usr/local/bin/mc https://dl.minio.io/client/mc/release/linux-arm/mc
-sudo chmod +x /usr/local/bin/mc
-```
-
-Example MinIO client usage.
-```
-mc config host add <HOSTNAME> <URL> <ACCESS_KEY> <SECRET_KEY>
-mc mb <HOSTNAME>/share
-mc cp resume.pdf <HOSTNAME>/share
-mc share download --expire 96h <HOSTNAME>/share/resume.pdf
-mc share list download
-```
-
 ## Configure NGINX (VPS)
 Ensure that [Docker Compose](https://docs.docker.com/compose/install/#install-compose) is installed:
 ```
@@ -106,4 +90,20 @@ Match User ssh_tunnel
 On Pi, start persistent SSH tunnel to VPS via `cron` + `autossh`.
 ```
 */5 * * * * pgrep -afi 'autossh.*ssh_tunnel@<VPS>' || autossh -M 0 -o 'ServerAliveInterval 30' -o 'ServerAliveCountMax 3' -p <PORT> -f -N -R 172.17.0.1:9090:127.0.0.1:9000 -i ~/.ssh/ssh_tunnel ssh_tunnel@<VPS>
+```
+
+## Administer MinIO
+Download MinIO client.
+```
+sudo curl -o /usr/local/bin/mc https://dl.minio.io/client/mc/release/linux-arm/mc
+sudo chmod +x /usr/local/bin/mc
+```
+
+Example MinIO client usage.
+```
+mc config host add <HOSTNAME> <URL> <ACCESS_KEY> <SECRET_KEY>
+mc mb <HOSTNAME>/share
+mc cp resume.pdf <HOSTNAME>/share
+mc share download --expire 96h <HOSTNAME>/share/resume.pdf
+mc share list download
 ```
