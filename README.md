@@ -66,7 +66,7 @@ Configure NGINX and start. In the `sed` line, replace "`YOURACTUAL*`" with _your
 ```
 cd minifloppies/nginx
 sed -i 's/\[HOSTNAME\]/YOURACTUALHOSTNAME/g' nginx.conf    # e.g., my.domain.com
-sed -i 's/\[EMAIL\]/YOURACTUALEMAIL/g' docker-compose.yml  # e.g., myemail@gmail.com
+sed -i 's/\[EMAIL\]/"YOURACTUALEMAIL"/g' docker-compose.yml  # e.g., myemail@gmail.com
 sudo docker-compose up
 ```
 
