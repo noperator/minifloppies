@@ -39,14 +39,14 @@ Generate MinIO S3 keys.
 Run MinIO container with keys generated above.
 ```
 sudo docker run -d -p 9000:9000 \
-  -e "MINIO_ACCESS_KEY=[ACCESS_KEY]" \
-  -e "MINIO_SECRET_KEY=[SECRET_KEY]" \
+  -e "MINIO_ACCESS_KEY=<ACCESS_KEY>" \
+  -e "MINIO_SECRET_KEY=<SECRET_KEY>" \
   -v /srv/minio_data:/data \
   -v /srv/minio_config:/root/.minio \
   minio-arm server /data
 ```
 
-## Administer MinIO.
+## Administer MinIO
 Download MinIO client.
 ```
 sudo curl -o /usr/local/bin/mc https://dl.minio.io/client/mc/release/linux-arm/mc
@@ -55,10 +55,10 @@ sudo chmod +x /usr/local/bin/mc
 
 Example MinIO client usage.
 ```
-mc config host add [HOSTNAME] [URL] [ACCESS_KEY] [SECRET_KEY]
-mc mb [HOSTNAME]/resume
-mc cp resume.pdf [HOSTNAME]/resume
-mc share download --expire 96h [HOSTNAME]/resume/resume.pdf
+mc config host add <HOSTNAME> <URL> <ACCESS_KEY> <SECRET_KEY>
+mc mb <HOSTNAME>/resume
+mc cp resume.pdf <HOSTNAME>/resume
+mc share download --expire 96h <HOSTNAME>/resume/resume.pdf
 mc share list download
 ```
 
@@ -72,8 +72,8 @@ sudo chmod +x /usr/local/bin/docker-compose
 Configure NGINX and start. In the `sed` line, replace "`YOURACTUAL*`" with _your actual whatever_.
 ```
 cd minifloppies/nginx
-sed -i 's/\[HOSTNAME\]/YOURACTUALHOSTNAME/g' nginx.conf    # e.g., my.domain.com
-sed -i 's/\[EMAIL\]/"YOURACTUALEMAIL"/g' docker-compose.yml  # e.g., myemail@gmail.com
+sed -i 's/<HOSTNAME>/YOURACTUALHOSTNAME/g' nginx.conf    # e.g., my.domain.com
+sed -i 's/<EMAIL>/YOURACTUALEMAIL/g' docker-compose.yml  # e.g., myemail@gmail.com
 sudo docker-compose up
 ```
 
@@ -87,7 +87,7 @@ sudo passwd ssh_tunnel
 On Pi, generate and transfer SSH keys for restricted user `ssh_tunnel`.
 ```
 ssh-keygen -t rsa -b 4096 -o -a 100 -N '' -f ~/.ssh/ssh_tunnel
-ssh-copy-id -i ~/.ssh/ssh_tunnel ssh_tunnel@[VPS]
+ssh-copy-id -i ~/.ssh/ssh_tunnel ssh_tunnel@<VPS>
 ```
 
 On VPS, lock down restricted user `ssh_tunnel`.
@@ -106,5 +106,5 @@ Match User ssh_tunnel
 
 On Pi, start persistent SSH tunnel to VPS via `cron` + `autossh`.
 ```
-*/5 * * * * pgrep -afi 'autossh.*ssh_tunnel@[VPS]' || autossh -M 0 -o 'ServerAliveInterval 30' -o 'ServerAliveCountMax 3' -p [PORT] -f -N -R 172.17.0.1:9000:127.0.0.1:9000 -i ~/.ssh/ssh_tunnel ssh_tunnel@[VPS]
+*/5 * * * * pgrep -afi 'autossh.*ssh_tunnel@<VPS>' || autossh -M 0 -o 'ServerAliveInterval 30' -o 'ServerAliveCountMax 3' -p <PORT> -f -N -R 172.17.0.1:9000:127.0.0.1:9000 -i ~/.ssh/ssh_tunnel ssh_tunnel@<VPS>
 ```

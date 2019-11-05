@@ -5,7 +5,7 @@ services:
     build: .
     restart: always
     environment:
-      CERTBOT_EMAIL: [EMAIL]
+      CERTBOT_EMAIL: "<EMAIL>"
     ports:
       - "80:80"
       - "443:443"
