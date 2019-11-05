@@ -1,11 +1,22 @@
-version: '3'
-
+---
+version: "2"
 services:
-  proxy:
-    build: .
-    restart: always
+  letsencrypt:
+    image: linuxserver/letsencrypt
+    container_name: letsencrypt
+    cap_add:
+      - NET_ADMIN
     environment:
-      CERTBOT_EMAIL: "<EMAIL>"
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/New_York
+      - URL=$URL
+      - SUBDOMAINS=www,
+      - VALIDATION=http
+    volumes:
+      - /tmp/letsencrypt_config:/config
     ports:
-      - "80:80"
-      - "443:443"
+      - 443:443
+      - 80:80 #optional
+    restart: unless-stopped
+    network_mode: host

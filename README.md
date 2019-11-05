@@ -9,7 +9,7 @@ While interviewing for jobs, I had to share my resume with recruiters at many di
 - Does not require entering a password.
 - Allows sharing via one-time download links.
 
-## Configure MinIO on Raspberry Pi
+## Configure MinIO (Pi)
 Install Docker ARM  using the [convenience script](https://docs.docker.com/install/linux/docker-ce/debian/#install-using-the-convenience-script).
 ```
 curl -fsSL https://get.docker.com -o get-docker.sh
@@ -63,21 +63,21 @@ mc share list download
 ```
 
 ## Configure NGINX (VPS)
-Ensure that [Docker Compose](https://docs.docker.com/compose/install/#install-compose) is installed.
+Ensure that [Docker Compose](https://docs.docker.com/compose/install/#install-compose) is installed:
 ```
 sudo curl -L "https://github.com/docker/compose/releases/download/1.24.1/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
 sudo chmod +x /usr/local/bin/docker-compose
 ```
 
-Configure NGINX and start. In the `sed` line, replace "`YOURACTUAL*`" with _your actual whatever_.
+Configure NGINX and start.
 ```
 cd minifloppies/nginx
-sed -i 's/<HOSTNAME>/YOURACTUALHOSTNAME/g' nginx.conf    # e.g., my.domain.com
-sed -i 's/<EMAIL>/YOURACTUALEMAIL/g' docker-compose.yml  # e.g., myemail@gmail.com
-sudo docker-compose up
+export URL=<URL>
+sudo docker-run.sh
+cp site.conf /tmp/letsencrypt_config/nginx/site-confs/default
 ```
 
-## Configure SSH tunnel between Pi and VPS.
+## Configure SSH tunnel between Pi and VPS
 On VPS, create a restricted user `ssh_tunnel` who may only open SSH tunnels.
 ```
 sudo useradd ssh_tunnel -m -d /home/ssh_tunnel -s /bin/bash
@@ -106,5 +106,5 @@ Match User ssh_tunnel
 
 On Pi, start persistent SSH tunnel to VPS via `cron` + `autossh`.
 ```
-*/5 * * * * pgrep -afi 'autossh.*ssh_tunnel@<VPS>' || autossh -M 0 -o 'ServerAliveInterval 30' -o 'ServerAliveCountMax 3' -p <PORT> -f -N -R 172.17.0.1:9000:127.0.0.1:9000 -i ~/.ssh/ssh_tunnel ssh_tunnel@<VPS>
+*/5 * * * * pgrep -afi 'autossh.*ssh_tunnel@<VPS>' || autossh -M 0 -o 'ServerAliveInterval 30' -o 'ServerAliveCountMax 3' -p <PORT> -f -N -R 172.17.0.1:9090:127.0.0.1:9000 -i ~/.ssh/ssh_tunnel ssh_tunnel@<VPS>
 ```
