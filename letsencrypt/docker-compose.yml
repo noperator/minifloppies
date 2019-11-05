@@ -11,12 +11,11 @@ services:
       - PGID=1000
       - TZ=America/New_York
       - URL=$URL
-      - SUBDOMAINS=www,
       - VALIDATION=http
     volumes:
-      - /tmp/letsencrypt_config:/config
+      - /var/letsencrypt:/config
     ports:
       - 443:443
-      - 80:80 #optional
+      - 80:80
     restart: unless-stopped
     network_mode: host
